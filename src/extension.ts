@@ -75,3 +75,6 @@ function provideHover(document: vscode.TextDocument, position: vscode.Position):
     return new vscode.Hover(hoverContent);
   });
 }
+
+// TODO: see https://github.com/microsoft/vscode-extension-samples/tree/main/code-actions-sample
+// for code actions
