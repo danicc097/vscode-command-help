@@ -1,6 +1,5 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { exec } from 'child_process';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -19,8 +18,45 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Hello World from vscode-command-help!');
 	});
 
+
 	context.subscriptions.push(disposable);
+
+  context.subscriptions.push(vscode.languages.registerHoverProvider('shellscript', {
+    provideHover
+  }));
 }
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
+
+// Function to run the shell command and get the output
+async function getCommandHelp(word: string): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    exec(`${word} --help`, (error, stdout, stderr) => {
+      if (error) {
+        console.error("--help error: "+error);
+        reject(error);
+      } else {
+        resolve(stdout || stderr);
+      }
+    });
+  });
+}
+
+// Function to create the hover provider
+function provideHover(document: vscode.TextDocument, position: vscode.Position): vscode.ProviderResult<vscode.Hover> {
+  const wordRange = document.getWordRangeAtPosition(position);
+  if (!wordRange) {
+    return undefined;
+  }
+
+  /**
+   * TODO: only execute from dict of allowed commands. (simple `Add to vscode-command-help`)
+     we will get dynamic help, so we need to execute the command... Use at own risk
+   */
+  const word = document.getText(wordRange);
+  vscode.window.showInformationMessage(word);
+  return getCommandHelp(word).then((output) => {
+    return new vscode.Hover(new vscode.MarkdownString(output));
+  });
+}
