@@ -57,8 +57,8 @@ async function getCommandHelp(word: string): Promise<string> {
 // Function to create the hover provider
 function provideHover(document: vscode.TextDocument, position: vscode.Position): vscode.ProviderResult<vscode.Hover> {
   const wordRange = document.getWordRangeAtPosition(position, /[a-zA-Z0-9_./-]+/);
-  if (!wordRange) {
-    return undefined;
+  if (!wordRange ) {
+    return;
   }
 
   /**
@@ -66,8 +66,12 @@ function provideHover(document: vscode.TextDocument, position: vscode.Position):
      we will get dynamic help, so we need to execute the command... Use at own risk
    */
   const word = document.getText(wordRange);
-  vscode.window.showInformationMessage(word);
+  if (word.startsWith("-")) {return;};
+
   return getCommandHelp(word).then((output) => {
-    return new vscode.Hover(new vscode.MarkdownString(output));
+    const hoverContent = new vscode.MarkdownString('```\n' + output + '\n```');
+
+    hoverContent.isTrusted = true;
+    return new vscode.Hover(hoverContent);
   });
 }
