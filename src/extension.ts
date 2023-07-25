@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { exec } from 'child_process';
+import { spawn } from 'child_process';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -32,20 +33,30 @@ export function deactivate() {}
 // Function to run the shell command and get the output
 async function getCommandHelp(word: string): Promise<string> {
   return new Promise<string>((resolve, reject) => {
-    exec(`${word} --help`, (error, stdout, stderr) => {
-      if (error) {
-        console.error("--help error: "+error);
-        reject(error);
-      } else {
-        resolve(stdout || stderr);
-      }
+    const childProcess = spawn(word, ['--help'], {shell: '/bin/bash',});
+    let output = '';
+
+    childProcess.stdout.on('data', (data) => {
+      output += "\n"+data.toString();
+    });
+
+    childProcess.stderr.on('data', (data) => {
+      output += "\n"+data.toString();
+    });
+
+    childProcess.on('error', (error) => {
+      output += "\n"+error.toString();
+    });
+
+    childProcess.on('close', (code) => {
+        resolve(output);
     });
   });
 }
 
 // Function to create the hover provider
 function provideHover(document: vscode.TextDocument, position: vscode.Position): vscode.ProviderResult<vscode.Hover> {
-  const wordRange = document.getWordRangeAtPosition(position);
+  const wordRange = document.getWordRangeAtPosition(position, /[a-zA-Z0-9_./-]+/);
   if (!wordRange) {
     return undefined;
   }
