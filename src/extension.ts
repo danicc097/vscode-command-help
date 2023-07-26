@@ -2,6 +2,10 @@ import * as vscode from 'vscode';
 import { exec } from 'child_process';
 import { spawn } from 'child_process';
 
+const COMMANDS = {
+  addCommand: 'vscode-command-help.addCommand'
+};
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -11,15 +15,18 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('vscode-command-help.addCommand', (word) => {
+	let disposable = vscode.commands.registerCommand(COMMANDS.addCommand, (word) => {
 		config.update("commands", (config.get("commands") as string[]).concat([word]));
 	});
 
 
-	context.subscriptions.push(disposable);
-
-  context.subscriptions.push(vscode.languages.registerHoverProvider('shellscript', {
+	context.subscriptions.push(
+    disposable,
+    vscode.languages.registerHoverProvider('shellscript', {
     provideHover
+  }),
+  vscode.languages.registerCodeActionsProvider('shellscript', new ActionProvider(), {
+    providedCodeActionKinds: ActionProvider.providedCodeActionKinds
   }));
 }
 
@@ -72,5 +79,28 @@ function provideHover(document: vscode.TextDocument, position: vscode.Position):
   });
 }
 
-// TODO: see https://github.com/microsoft/vscode-extension-samples/tree/main/code-actions-sample
-// for code actions
+
+
+export class ActionProvider implements vscode.CodeActionProvider {
+
+	public static readonly providedCodeActionKinds = [
+		vscode.CodeActionKind.QuickFix
+	];
+
+	provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken): vscode.CodeAction[] {
+    const config = vscode.workspace.getConfiguration('vscode-command-help');
+  const commands = config.get("commands") as string[];
+
+		return context.diagnostics
+			// .filter(diagnostic => diagnostic.code === EMOJI_MENTION)
+			.map(diagnostic => this.createCommandCodeAction(diagnostic));
+	}
+
+	private createCommandCodeAction(diagnostic: vscode.Diagnostic): vscode.CodeAction {
+		const action = new vscode.CodeAction('Learn more...', vscode.CodeActionKind.QuickFix);
+		action.command = { command: COMMANDS.addCommand, title: 'Add as command', tooltip: 'This will save the hovered word as a command.' };
+		action.diagnostics = [diagnostic];
+		action.isPreferred = true;
+		return action;
+	}
+}
