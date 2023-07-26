@@ -16,10 +16,25 @@
   "contributes": {
     "commands": [
       {
-        "command": "vscode-command-help.helloWorld",
-        "title": "Hello World"
+        "command": "vscode-command-help.addCommand",
+        "title": "Add word on cursor as command"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Command help hover",
+      "properties": {
+        "vscode-command-help.commands": {
+          "scope": "resource",
+          "type": "array",
+          "default": [],
+          "description": "List of commands to show help hover for.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
