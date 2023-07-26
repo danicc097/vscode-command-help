@@ -1,2 +1,1 @@
-# vscode-command-help README
-
+# vscode-command-help

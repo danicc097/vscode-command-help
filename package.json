@@ -2,7 +2,7 @@
   "name": "vscode-command-help",
   "displayName": "vscode-command-help",
   "description": "Show --help document for any command as hover info",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -32,9 +32,19 @@
           "items": {
             "type": "string"
           }
+        },
+        "vscode-command-help.pre": {
+          "scope": "resource",
+          "type": "string",
+          "default": null,
+          "description": "Command to run before running `{command} --help`. Use to append bins to PATH, source environment..."
         }
       }
     }
+  },
+  "publisher": "danicc097",
+  "repository": {
+    "url": "github.com/danicc097/vscode-command-help"
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
