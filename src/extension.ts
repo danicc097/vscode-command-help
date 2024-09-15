@@ -12,15 +12,20 @@ export function activate(context: vscode.ExtensionContext) {
     config.update('commands', (config.get('commands') as string[]).concat([word]))
   })
 
+
   context.subscriptions.push(
     disposable,
     vscode.languages.registerHoverProvider('shellscript', {
       provideHover,
     }),
-    vscode.languages.registerCodeActionsProvider('shellscript', new ActionProvider(), {
+    // quick fix
+    /* vscode.languages.registerCodeActionsProvider('shellscript',
+      new ActionProvider(), {
       providedCodeActionKinds: ActionProvider.providedCodeActionKinds,
     }),
+    */
   )
+
 }
 
 export function deactivate() {}
