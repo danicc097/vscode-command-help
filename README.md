@@ -1,5 +1,6 @@
 # vscode-command-help
 
+Show command `--help` documentation on hover. Assumes `/bin/bash` is available. 
 
 Usage:
 
